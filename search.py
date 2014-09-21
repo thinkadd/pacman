@@ -42,7 +42,7 @@ class SearchProblem:
      For a given state, this should return a list of triples, 
      (successor, action, stepCost), where 'successor' is a 
      successor to the current state, 'action' is the action
-     required to get there, and 'stepCost' is the incremental 
+     return graph_search(problem, Stack())    required to get there, and 'stepCost' is the incremental 
      cost of expanding to that successor
      """
      util.raiseNotDefined()
@@ -67,6 +67,7 @@ def tinyMazeSearch(problem):
   w = Directions.WEST
   return  [s,s,w,s,w,w,s,w]
 
+
 def depthFirstSearch(problem):
   """
   Search the deepest nodes in the search tree first [p 85].
@@ -82,16 +83,75 @@ def depthFirstSearch(problem):
   print "Start's successors:", problem.getSuccessors(problem.getStartState())
   """
   "*** YOUR CODE HERE ***"
+  print "Start:", problem.getStartState()
+  print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+  print "Start's successors:",problem.getSuccessors(problem.getStartState())
+  frontier=util.Stack()
+  frontier.push((problem.getStartState(),[],0))
+  explored=[]
+  while frontier:
+    present_node=frontier.pop()
+    if problem.isGoalState(present_node[0]):
+      return present_node[1]
+    if present_node[0] not in explored:
+      explored.append(present_node[0])
+      child_nodes=problem.getSuccessors(present_node[0])
+      for child_node in child_nodes:
+        path=present_node[1]+[child_node[1]]
+        cost=child_node[2]
+        frontier.push((child_node[0],path,cost))
+  return []
   util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
   "Search the shallowest nodes in the search tree first. [p 81]"
   "*** YOUR CODE HERE ***"
+  frontier=util.Queue()
+  frontier.push((problem.getStartState(),[],0))
+  explored=[]
+  while frontier:
+    present_node=frontier.pop()
+    if problem.isGoalState(present_node[0]):
+      return present_node[1]
+    if present_node[0] not in explored:
+      explored.append(present_node[0])
+      child_nodes=problem.getSuccessors(present_node[0])
+      for child_node in child_nodes:
+        path=present_node[1]+[child_node[1]]
+        cost=child_node[2]
+        frontier.push((child_node[0],path,cost))
+  return [] 
   util.raiseNotDefined()
       
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
   "*** YOUR CODE HERE ***"
+  print "Start:", problem.getStartState()
+  print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+  print "Start's successors:", problem.getSuccessors(problem.getStartState())
+  
+  frontier=util.PriorityQueue()
+  frontier.push((problem.getStartState(),[],0),0)
+  explored=[]
+  cost_dict={}
+  while frontier:
+    present_node=frontier.pop()
+    if problem.isGoalState(present_node[0]):
+      return present_node[1]
+    else:
+      explored.append(present_node[0])  
+      child_nodes=problem.getSuccessors(present_node[0])
+      for child_node in child_nodes:
+        if child_node[0] not in explored:
+          solution=present_node[1]+[child_node[1]]
+          step_cost=child_node[2]
+          path_cost=present_node[2]+child_node[2]
+          if not cost_dict.has_key(child_node[0]):
+            frontier.push((child_node[0],solution,step_cost),path_cost)
+          elif cost_dict[child_node[0]]>path_cost:
+            frontier.push((child_node[0],solution,step_cost),path_cost)
+            cost_dict[child_node[0]]=path_cost
+  return []
   util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -104,6 +164,32 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
   "Search the node that has the lowest combined cost and heuristic first."
   "*** YOUR CODE HERE ***"
+  print "Start:", problem.getStartState()
+  print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+  print "Start's successors:", problem.getSuccessors(problem.getStartState())
+  
+  frontier=util.PriorityQueue()
+  frontier.push((problem.getStartState(),[],0),0)
+  explored=[]
+  cost_dict={}
+  while frontier:
+    present_node=frontier.pop()
+    if problem.isGoalState(present_node[0]):
+      return present_node[1]
+    else:
+      explored.append(present_node[0])  
+      child_nodes=problem.getSuccessors(present_node[0])
+      for child_node in child_nodes:
+        if child_node[0] not in explored:
+          solution=present_node[1]+[child_node[1]]
+          step_cost=child_node[2]
+          path_cost=present_node[2]+child_node[2]
+          if not cost_dict.has_key((child_node[0])):
+            frontier.push((child_node[0],solution,step_cost),path_cost+heuristic(child_node[0],problem))
+          elif cost_dict[child_node[0]]>path_cost:
+            frontier.push((child_node[0],solution,step_cost),path_cost+heuristic(child_node[0],problem))
+            cost_dict[child_node[0]]=path_cost
+  return []  
   util.raiseNotDefined()
     
   
@@ -112,3 +198,4 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
